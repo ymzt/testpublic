@@ -1,0 +1,238 @@
+# -*- coding: utf-8-unix; -*-
+#+STARTUP: indent
+#+TITLE: Literate Programming
+#+OPTIONS: ^:nil
+
+* [[https://github.com/ymzt/testpublic/blob/main/.github/workflows/static.yml][static.yml]]
+
+#+begin_src shell :results pp :wrap src yaml :exports none
+cat $HOME/.dotfiles/code-working/testpublic/.github/workflows/static.yml
+#+end_src
+
+** Workflow Name
+#+begin_src yaml :tangle .github/workflows/static.yml
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+#+end_src
+
+** Events
+#+begin_src yaml :tangle .github/workflows/static.yml
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+#+end_src
+
+** Permissions
+
+#+begin_src yaml :tangle .github/workflows/static.yml
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+#+end_src
+
+** Concurrency
+
+#+begin_src yaml :tangle .github/workflows/static.yml
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+#+end_src
+
+** Jobs
+#+begin_src yaml :tangle .github/workflows/static.yml
+jobs:
+#+end_src
+
+*** Build Job
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+  # Build Job
+  build:
+    runs-on: ubuntu-latest
+#+end_src
+
+**** Initital Steps
+
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+#+end_src
+
+**** Set Files
+
+- https://github.com/pandoc/pandoc-action-example
+- https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+
+should be updated to write to the new GITHUB_STATE and GITHUB_OUTPUT environment files:
+
+#+begin_src yaml :tangle no
+      - name: startup
+        run: |
+          echo pwd: $(pwd)
+      - name: create file list
+        id: files_list
+        run: |
+          echo "Lorem ipsum" > lorem_1.md  # create two example files
+          echo "dolor sit amet" > lorem_2.md
+          mkdir output  # create output dir
+#+end_src
+
+# this will also include README.md
+echo "::set-output name=files::$(printf '"%s" ' *.md)"
+
+**** Setting an output parameter
+https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+      - name: Set color
+        id: random-color-generator
+        run: echo "SELECTED_COLORS=green yellow" >> $GITHUB_OUTPUT
+      - name: Get color
+        run: echo "The selected color is ${{ steps.random-color-generator.outputs.SELECTED_COLORS }}"
+#+end_src
+
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+      - run: |
+          echo steps.files_list.outputs.files: ${{ steps.files_list.outputs.files }}
+      - run: |
+          mkdir -p docs
+          mkdir -p docs2
+#+end_src
+
+**** Document Conversion
+
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+      - uses: docker://pandoc/core:2.11
+        with:
+          args: readme.md -s -o docs/readme.html
+      - uses: docker://pandoc/core:2.11
+        with:
+          args: migration.org -s -o docs/migration.html
+      - uses: docker://pandoc/core:2.11
+        with:
+          args: index.org -s --css github-pandoc.css -o docs/literate-programming.html
+#+end_src
+
+**** Upload
+#+begin_src yaml :tangle .github/workflows/static.yml :padline no
+      - name: Upload artifact1
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'docs'
+#+end_src
+
+*** Deploy Job
+#+begin_src yaml :tangle .github/workflows/static.yml
+  # Deploy job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+#+end_src
+
+* Self Hosted Runner                                              :noexport:
+
+** Download
+#+begin_src shell
+mkdir -p ~/tmp/github-host-runner
+cd ~/tmp/github-host-runner
+
+# Create a folder
+# mkdir actions-runner && cd actions-runner
+# Download the latest runner package
+curl -o actions-runner-osx-x64-2.301.1.tar.gz -L \
+  https://github.com/actions/runner/releases/download/v2.301.1/actions-runner-osx-x64-2.301.1.tar.gz
+# Optional: Validate the hash
+echo "3e0b037ea67e9626e99e6d3ff803ce0d8cc913938ddd1948b3a410ac6a75b878  actions-runner-osx-x64-2.301.1.tar.gz" \
+    | shasum -a 256 -c
+# Extract the installer
+tar xzf ./actions-runner-osx-x64-2.301.1.tar.gz
+#+end_src
+
+** Configure & Run
+
+#+begin_src shell
+# Create the runner and start the configuration experience
+./config.sh --url https://github.com/ymzt/testpublic
+# Last step, run it!
+./run.sh
+#+end_src
+
+
+#+begin_example
+λ ./config.sh --url https://github.com/ymzt/testpublic
+
+--------------------------------------------------------------------------------
+|        ____ _ _   _   _       _          _        _   _                      |
+|       / ___(_) |_| | | |_   _| |__      / \   ___| |_(_) ___  _ __  ___      |
+|      | |  _| | __| |_| | | | | '_ \    / _ \ / __| __| |/ _ \| '_ \/ __|     |
+|      | |_| | | |_|  _  | |_| | |_) |  / ___ \ (__| |_| | (_) | | | \__ \     |
+|       \____|_|\__|_| |_|\__,_|_.__/  /_/   \_\___|\__|_|\___/|_| |_|___/     |
+|                                                                              |
+|                       Self-hosted runner registration                        |
+|                                                                              |
+--------------------------------------------------------------------------------
+
+# Authentication
+
+
+√ Connected to GitHub
+
+# Runner Registration
+
+Enter the name of the runner group to add this runner to: [press Enter for Default]
+
+Enter the name of runner: [press Enter for Sakura]
+
+This runner will have the following labels: 'self-hosted', 'macOS', 'X64'
+Enter any additional labels (ex. label-1,label-2): [press Enter to skip]
+
+√ Runner successfully added
+√ Runner connection is good
+
+# Runner settings
+
+Enter name of work folder: [press Enter for _work]
+
+√ Settings Saved.
+#+end_example
+
+#+begin_example
+λ ./run.sh
+
+√ Connected to GitHub
+
+Current runner version: '2.301.1'
+2023-02-19 12:42:11Z: Listening for Jobs
+#+end_example
+
+
+** Usage in Yaml
+#+begin_src yaml
+# Use this YAML in your workflow file for each job
+runs-on: self-hosted
+#+end_src
+
+
+
+* Local Variables                                                 :noexport:
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook 'delete-trailing-whitespace t t)
+# eval: (add-hook 'after-save-hook 'org-babel-tangle t t)
+# End:
