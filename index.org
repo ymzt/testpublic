@@ -168,9 +168,9 @@ tar xzf ./actions-runner-osx-x64-2.301.1.tar.gz
 
 #+begin_src shell
 # Create the runner and start the configuration experience
-./config.sh --url https://github.com/ymzt/testpublic
+
 # Last step, run it!
-./run.sh
+
 #+end_src
 
 
