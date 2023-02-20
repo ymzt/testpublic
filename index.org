@@ -46,20 +46,19 @@ concurrency:
 #+end_src
 
 ** Jobs
+
 #+begin_src yaml :tangle .github/workflows/static.yml
 jobs:
 #+end_src
 
 *** Build Job
+
+**** Job Configuration and Initital Steps
+
 #+begin_src yaml :tangle .github/workflows/static.yml :padline no
   # Build Job
   build:
     runs-on: ubuntu-latest
-#+end_src
-
-**** Initital Steps
-
-#+begin_src yaml :tangle .github/workflows/static.yml :padline no
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -105,7 +104,6 @@ https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-
           echo steps.files_list.outputs.files: ${{ steps.files_list.outputs.files }}
       - run: |
           mkdir -p docs
-          mkdir -p docs2
 #+end_src
 
 **** Document Conversion
@@ -145,8 +143,8 @@ https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-
         uses: actions/deploy-pages@v1
 #+end_src
 
-* Self Hosted Runner                                              :noexport:
 
+* Self Hosted Runner                                              :noexport:
 ** Download
 #+begin_src shell
 mkdir -p ~/tmp/github-host-runner
@@ -221,16 +219,33 @@ Current runner version: '2.301.1'
 2023-02-19 12:42:11Z: Listening for Jobs
 #+end_example
 
-
 ** Usage in Yaml
 #+begin_src yaml
 # Use this YAML in your workflow file for each job
 runs-on: self-hosted
 #+end_src
 
+
+
+* Git Commands
+
+#+begin_src shell
+cd $HOME/code-working/testpublic
+
+git add .  #
+git add -u
+git add -A
+
+git commit -m "commited at $(date)"
+git push
+
+git add .; git commit -m "commited at $(date)"; git push
+#+end_src
+
 * Ref
 
 https://yoshikyoto.github.io/text/git/gh_pages_md.html
+
 
 * Local Variables                                                 :noexport:
 

@@ -38,7 +38,6 @@ jobs:
           echo steps.files_list.outputs.files: ${{ steps.files_list.outputs.files }}
       - run: |
           mkdir -p docs
-          mkdir -p docs2
       - uses: docker://pandoc/core:2.11
         with:
           args: readme.md -s -o docs/readme.html
